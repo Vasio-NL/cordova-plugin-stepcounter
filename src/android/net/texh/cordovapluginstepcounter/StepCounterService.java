@@ -98,14 +98,6 @@ public class StepCounterService extends Service implements SensorEventListener {
             return START_NOT_STICKY;
         }
 
-        Log.i(TAG, "- Relaunch service in 1 hour (4.4.2 start_sticky bug ) : ");
-        Intent newServiceIntent = new Intent(this,StepCounterService.class);
-        AlarmManager aManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        PendingIntent stepIntent = PendingIntent.getService(getApplicationContext(), 10, newServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        //PendingIntent.GetService (ApplicationContext, 10, intent2, PendingIntentFlags.UpdateCurrent);
-        aManager.set(AlarmManager.RTC, java.lang.System.currentTimeMillis() + 1000 * 60 * 60, stepIntent);
-
-
         if (isRunning /* || has no step sensors */) {
             Log.i(TAG, "Not initialising sensors");
             return Service.START_STICKY;
