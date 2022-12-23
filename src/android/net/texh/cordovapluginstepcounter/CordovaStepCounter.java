@@ -82,12 +82,11 @@ public class CordovaStepCounter extends CordovaPlugin {
                                        IBinder service) {
             StepCounterService.StepCounterServiceBinder binder = (StepCounterService.StepCounterServiceBinder) service;
             stepCounterService = binder.getService();
-            bound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            bound = false;
+
         }
     };
 
@@ -103,7 +102,7 @@ public class CordovaStepCounter extends CordovaPlugin {
             }
 
             if(!bound){
-                activity.bindService(stepCounterIntent, mConnection, Context.BIND_AUTO_CREATE);
+                bound = activity.bindService(stepCounterIntent, mConnection, Context.BIND_AUTO_CREATE);
             }
 
         }
@@ -169,7 +168,7 @@ public class CordovaStepCounter extends CordovaPlugin {
 
             if(!bound){
                 Log.i(TAG, "Binding StepCounterService");
-                activity.bindService(stepCounterIntent, mConnection, Context.BIND_AUTO_CREATE);
+                bound = activity.bindService(stepCounterIntent, mConnection, Context.BIND_AUTO_CREATE);
             }else{
                 Log.i(TAG, "StepCounterService already binded");
             }
@@ -200,6 +199,7 @@ public class CordovaStepCounter extends CordovaPlugin {
             if (bound) {
                 Log.i(TAG, "Unbinding StepCounterService");
                 activity.unbindService(mConnection);
+                bound = false;
             } else{
                 Log.i(TAG, "StepCounterService already unbinded");
             }
@@ -282,15 +282,17 @@ public class CordovaStepCounter extends CordovaPlugin {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
+
         Activity activity = this.cordova.getActivity();
-        activity.unbindService(mConnection);
+        if(bound){
+          activity.unbindService(mConnection);
+          bound = false;
+        }
 
         Log.i(TAG, "Setting pedometer as inactive !");
         SharedPreferences sharedPref = activity.getSharedPreferences(USER_DATA_PREF, Context.MODE_PRIVATE);
         this.setPedometerIsActive(sharedPref, false);
-        bound = false;
-
-        super.onDestroy();
     }
 
     //Getter / Setter for pedometerActive preferences
